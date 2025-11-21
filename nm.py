@@ -80,6 +80,13 @@ def choose_node_role() -> Role:
             INFO(f"Device set to {Role.RECEIVER} role")
             return Role.RECEIVER
 
+def disable_auto_ack(nrf: NRF24):
+    nrf.unset_ce()
+    nrf._nrf_write_reg(nrf.EN_AA, 0x00)   # <<< disable auto-ack for all pipes
+    nrf.set_ce()
+
+    nrf.set_retransmission(0, 0)  # <<< disable auto-retransmissions (x+1) * 250 µs
+
 def create_radio_object() -> NRF24:
     # pigpio
     hostname = "localhost"
@@ -106,6 +113,8 @@ def create_radio_object() -> NRF24:
     address = b"NMND"
     nrf.open_writing_pipe(address)
     nrf.open_reading_pipe(RF24_RX_ADDR.P1, address)
+
+    disable_auto_ack(nrf)
     
     INFO(f"Radio details:")
     nrf.show_registers()
