@@ -251,6 +251,10 @@ def ACT_AS_TX(nrf: NRF24, content: bytes, own_channels: list[int]) -> None:
         control_message,
         frames
     ]
+
+
+    INFO(f"Cycle: {cycle}")
+
     cycle_len = len(cycle)
 
     idx = 0
