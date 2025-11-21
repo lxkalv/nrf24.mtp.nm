@@ -215,7 +215,7 @@ def choose_occupied_channel(nrf: NRF24, other_channels: list[int]) -> int:
 
         tic = time.time()
         tac = time.time()
-
+        INFO(f"TOY PROBANDO EN EL CANAL {channel} ")
         while (tac - tic) < channel_read_timeout:
             tac = time.time()
             nrf.set_channel(channel)
