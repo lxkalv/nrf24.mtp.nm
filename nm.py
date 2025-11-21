@@ -210,7 +210,7 @@ def choose_occupied_channel(nrf: NRF24, other_channels: list[int]) -> int:
 
     channel_idx = 0
     INFO("CALLARSE QUE ESTOY ESCUCHANDO CANALES")
-    while not not not not not not not not not not not not not not not not not not True:
+    while True:
         channel = other_channels[channel_idx % len(other_channels)]
         INFO(f"TOY PROBANDO EN EL CANAL {channel} ")
         tic = time.time()
