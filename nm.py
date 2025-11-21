@@ -153,7 +153,7 @@ def find_valid_txt_file_in_usb(usb_mount_path: Path) -> Path | None:
 
 # :::: CHANNELS :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 def get_channels_based_on_node_id(all_channels: list) -> tuple[list[int], list[int]]:
-    id = Path("~/node_id").resolve().read_text()
+    id = Path("~/node_id").expanduser().resolve().read_text()
 
     if   id == "tan0":
         offset = 0
@@ -304,8 +304,9 @@ def ACT_AS_RX(nrf: NRF24, other_channels: list[int]) -> bytes:
             computed_checksum = shake_256(b"".join(slots)).digest(29)
 
             if computed_checksum == checksum:
-                return b"".join(slots)
                 SUCC("EL CHESUM TA TO BIEN PRIMIKO")
+                return b"".join(slots)
+
             else:
                 WARN("EL CHESUM TA MAL LOKO")
 # :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
