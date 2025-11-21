@@ -192,7 +192,7 @@ def choose_free_channel(nrf: NRF24, own_channels: list[int]) -> int:
         for idx, channel in enumerate(own_channels):
             nrf.set_channel(channel)
             time.sleep(.2)
-            channel_occupability[idx] += is_channel_free()
+            channel_occupability[idx] += is_channel_free(nrf)
 
     selected = own_channels[0]
     n        = number_of_cycles + 1
