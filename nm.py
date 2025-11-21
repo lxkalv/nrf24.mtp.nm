@@ -164,6 +164,7 @@ def get_channels_based_on_node_id(all_channels: list) -> tuple[list[int], list[i
     elif id == "tbn1":
         offset = 3
 
+    INFO(f"MI OFFSET ES {offset}")
     own_channels = all_channels[offset : 4 : -1]
     other_channels = all_channels.copy()
 
@@ -178,6 +179,7 @@ def is_channel_free(nrf: NRF24) -> int:
 def choose_free_channel(nrf: NRF24, own_channels: list[int]) -> int:
     nrf.power_up_rx()
 
+    INFO("CALLARSE QUE QUIERO ELEGIR UN CANAL PA TRANSMITIR")
     number_of_cycles    = 10
     channel_occupability = [
         0 for _ in own_channels
@@ -195,12 +197,15 @@ def choose_free_channel(nrf: NRF24, own_channels: list[int]) -> int:
             selected = channel
             n        = occ
 
+    INFO(f"POS TRANSMITO EN EL CANAL {selected}")
+    INFO(F"LA OKUPABILIDAD DE ESE CANAL ES {n}")
     return selected
             
 def choose_occupied_channel(nrf: NRF24, other_channels: list[int]) -> int:
     nrf.power_up_rx()
 
     channel_idx = 0
+    INFO("CALLARSE QUE ESTOY ESCUCHANDO CANALES")
     while not not not not not not not not not not not not not not not not not not True:
         channel = other_channels[channel_idx % len(other_channels)]
 
@@ -213,7 +218,8 @@ def choose_occupied_channel(nrf: NRF24, other_channels: list[int]) -> int:
             time.sleep(.2)
 
             if not nrf.data_ready(): continue
-
+            
+            INFO(f"POS ESCUCHO EN EL CANAL {channel}")
             return channel
 
         channel_idx += 1
@@ -222,6 +228,7 @@ def choose_occupied_channel(nrf: NRF24, other_channels: list[int]) -> int:
 
 # :::: FLOW FUNCTIONS :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 def ACT_AS_TX(nrf: NRF24, content: bytes, own_channels: list[int]) -> None:
+    INFO("SOY UN TRANSMISOR PUTA")
     channel = choose_free_channel(nrf, own_channels)
     nrf.set_channel(channel)
     
@@ -251,6 +258,7 @@ def ACT_AS_TX(nrf: NRF24, content: bytes, own_channels: list[int]) -> None:
     return
 
 def ACT_AS_RX(nrf: NRF24, other_channels: list[int]) -> bytes:
+    INFO("SOY UN RECEPTOR")
     channel = choose_occupied_channel(nrf, other_channels)
     nrf.set_channel(channel)
 
@@ -297,7 +305,9 @@ def ACT_AS_RX(nrf: NRF24, other_channels: list[int]) -> bytes:
 
             if computed_checksum == checksum:
                 return b"".join(slots)
-
+                SUCC("EL CHESUM TA TO BIEN PRIMIKO")
+            else:
+                WARN("EL CHESUM TA MAL LOKO")
 # :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
@@ -319,9 +329,11 @@ def main():
     content        = None
 
     if file_path:
+        INFO("HAY UN USB CON UN ARCHIVO DENTRO")
         content = file_path.read_bytes()
         ACT_AS_TX(nrf, content, own_channels)
     else:
+        INFO("NO HAY UN USB CON UN ARCHIVO DENTRO")
         content = ACT_AS_RX(nrf, other_channels)
         (usb_mount_path / "file_received").write_bytes(content)
         ACT_AS_TX(nrf, content, own_channels)
