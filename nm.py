@@ -345,7 +345,8 @@ def main():
     else:
         INFO("NO HAY UN USB CON UN ARCHIVO DENTRO")
         content = ACT_AS_RX(nrf, other_channels)
-        (usb_mount_path / "file_received").write_bytes(content)
+        # (usb_mount_path / "file_received").write_bytes(content)
+        Path("file_received").write_bytes(content)
         ACT_AS_TX(nrf, content, own_channels)
 
     nrf.power_down()
