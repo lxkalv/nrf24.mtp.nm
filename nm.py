@@ -247,11 +247,9 @@ def ACT_AS_TX(nrf: NRF24, content: bytes, own_channels: list[int]) -> None:
     control_message += shake_256(content).digest(29) # Checksum of the file
     control_message += len(content).to_bytes(2)      # Ammount of data to transmit
 
-    cycle = [
-        control_message,
-        frames
-    ]
-
+    cycle = []
+    cycle.append(control_message)
+    cycle.extend(frames)
 
     INFO(f"Cycle: {cycle}")
 
