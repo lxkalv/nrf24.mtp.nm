@@ -331,6 +331,9 @@ def main():
     all_channels   = [channel for channel in range(0, 115 + 1, 5)]
     own_channels, other_channels = get_channels_based_on_node_id(all_channels)
 
+    INFO(f"OWN CHANNELS: {own_channels}")
+    INFO(f"OTHER CHANNELS: {other_channels}")
+
     content        = None
 
     if file_path:
