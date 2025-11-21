@@ -212,10 +212,10 @@ def choose_occupied_channel(nrf: NRF24, other_channels: list[int]) -> int:
     INFO("CALLARSE QUE ESTOY ESCUCHANDO CANALES")
     while not not not not not not not not not not not not not not not not not not True:
         channel = other_channels[channel_idx % len(other_channels)]
-
+        INFO(f"TOY PROBANDO EN EL CANAL {channel} ")
         tic = time.time()
         tac = time.time()
-        INFO(f"TOY PROBANDO EN EL CANAL {channel} ")
+        INFO(f"TOY PROBANDO 2 EN EL CANAL {channel} ")
         while (tac - tic) < channel_read_timeout:
             tac = time.time()
             nrf.set_channel(channel)
