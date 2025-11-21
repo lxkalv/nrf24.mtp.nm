@@ -157,6 +157,7 @@ def find_valid_txt_file_in_usb(usb_mount_path: Path) -> Path | None:
 # :::: CHANNELS :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 def get_channels_based_on_node_id(all_channels: list) -> tuple[list[int], list[int]]:
     id = Path("~/node_id").expanduser().resolve().read_text().strip()
+    INFO(f"ID detectao {id}")
 
     if   id == "tan0":
         offset = 0
