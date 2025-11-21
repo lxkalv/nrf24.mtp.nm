@@ -300,13 +300,13 @@ def ACT_AS_RX(nrf: NRF24, other_channels: list[int]) -> bytes:
 
 
 
-        if frame[0] < 0xFF and is_reading_frames:
+        if is_reading_frames and (frame[0] < 0xFF):
             FrameID        = frame[0]
             slots[FrameID] = frame[1:]
 
 
 
-        if frame[0] == num_of_frames - 1 and is_reading_frames:
+        if is_reading_frames and (frame[0] == num_of_frames - 1):
             computed_checksum = shake_256(b"".join(slots)).digest(29)
 
             if computed_checksum == checksum:
