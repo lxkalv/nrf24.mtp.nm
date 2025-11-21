@@ -21,6 +21,9 @@ from math import ceil
 from hashlib import shake_256
 
 from enum import Enum
+
+os.system("sudo pigpiod")
+os.system("clear")
 # :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
@@ -348,8 +351,6 @@ def main():
 
 if __name__ == "__main__":
     try:
-        os.system("sudo pigpiod")
-        os.system("clear")
         main()
     except KeyboardInterrupt:
         ERROR("Process interrupted by the user")
