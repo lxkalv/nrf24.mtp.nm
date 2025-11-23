@@ -383,12 +383,18 @@ def main():
     first_node = args.first
 
     if first_node:
+        last_msg = None
+        msg = None
         INFO("ESTE NODO HA SIDO ESCOGIDO COMO EL PRIMERO Y UNICO DE SU ESPECIE")
         while not file_path:
             if not usb_mount_path:
-                INFO("ESPERANDO A QUE SE INTRODUZCA UN USB...")
+                msg = "ESPERANDO A QUE SE INTRODUZCA UN USB..."
             else:
-                INFO("NO SE ENCUENTRA NINGUN ARCHIVO EN EL USB")
+                msg = "NO SE ENCUENTRA NINGUN ARCHIVO EN EL USB"
+
+            if msg is not None and msg != last_msg:
+                INFO(msg)
+                last_msg = msg
             
             usb_mount_path = get_usb_mount_path()
             file_path      = find_valid_txt_file_in_usb(usb_mount_path)
@@ -397,7 +403,7 @@ def main():
         INFO("HAY UN USB CON UN ARCHIVO DENTRO")
         INFO(f"SE HA ENCONTRADO EL SIGUIENTE ARCHIVO:{file_path}")
         content = file_path.read_bytes()
-        ACT_AS_TX(nrf, content, own_channels)
+        ACT_AS_TX(nrf, content, own_channels, first_node)
 
     else:
         INFO("NO HE SIDO ESCOGIDO COMO EL PRIMERO :((")
