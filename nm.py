@@ -22,6 +22,8 @@ from hashlib import shake_256
 
 from enum import Enum
 
+import argparse
+
 os.system("sudo pigpiod")
 os.system("clear")
 # :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -335,6 +337,14 @@ def main():
     """
     Main flow of the application
     """
+    parser = argparse.ArgumentParser(description="NRF24 Network Mode")
+    parser.add_argument(
+        "--first",
+        action="store_true",      # Si se pone la flag vale True, si no False
+        help="Declara el nodo como el primero",
+    )
+    args = parser.parse_args()
+
     nrf            = create_radio_object() 
     usb_mount_path = get_usb_mount_path()
     file_path      = find_valid_txt_file_in_usb(usb_mount_path)
@@ -347,16 +357,39 @@ def main():
 
     content        = None
 
-    if file_path:
+    if args.first:
+        INFO("ESTE NODO HA SIDO ESCOGIDO COMO EL PRIMERO Y UNICO DE SU ESPECIE")
+        while not file_path:
+            if not usb_mount_path:
+                INFO("ESPERANDO A QUE SE INTRODUZCA UN USB")
+            else:
+                INFO("NO SE ENCUENTRA NINGUN ARCHIVO EN EL USB")
+            
+            usb_mount_path = get_usb_mount_path()
+            file_path      = find_valid_txt_file_in_usb(usb_mount_path)
+
+
         INFO("HAY UN USB CON UN ARCHIVO DENTRO")
+        INFO(f"SE HA ENCONTRADO EL SIGUIENTE ARCHIVO:{file_path}")
         content = file_path.read_bytes()
         ACT_AS_TX(nrf, content, own_channels)
+
     else:
-        INFO("NO HAY UN USB CON UN ARCHIVO DENTRO")
-        content = ACT_AS_RX(nrf, other_channels)
-        # (usb_mount_path / "file_received").write_bytes(content)
-        Path("file_received").write_bytes(content)
-        ACT_AS_TX(nrf, content, own_channels)
+        INFO("NO HE SIDO ESCOGIDO COMO EL PRIMERO :((")
+        #La parte de codigo dentro de el if se deberia de eliminar y dejar solo la del else, de momento lo dejo igual
+        #porque no deberia de dar problemas, y en caso de que no se quiera hacer servir el script con la logica de settear el primer nodo
+        #y esperar al usb, va a funcionar igual. De tal manera que, se utilice la logica del primer nodo o no, funciona.
+        if file_path:
+            INFO("HAY UN USB CON UN ARCHIVO DENTRO")
+            INFO(f"SE HA ENCONTRADO EL SIGUIENTE ARCHIVO:{file_path}")
+            content = file_path.read_bytes()
+            ACT_AS_TX(nrf, content, own_channels)
+        else:
+            INFO("NO HAY UN USB CON UN ARCHIVO DENTRO")
+            content = ACT_AS_RX(nrf, other_channels)
+            # (usb_mount_path / "file_received").write_bytes(content)
+            Path("file_received").write_bytes(content)
+            ACT_AS_TX(nrf, content, own_channels)
 
     nrf.power_down()
     return
