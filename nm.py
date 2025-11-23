@@ -33,7 +33,7 @@ os.system("clear")
 
 
 # :::: CONSTANTS/GLOBALS ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-CE_PIN               = 22
+#CE_PIN               = 22
 RECEIVER_TIMEOUT_S   = 20
 BYTES_IN_FRAME       = 31
 channel_read_timeout = 1
@@ -58,6 +58,20 @@ def INFO(message: str)  -> None: print(f"{BLUE('[INFO]:')} {message}")
 
 
 # :::: NODE CONFIG ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+def get_id() -> str:
+    id = Path("~/node_id").expanduser().resolve().read_text().strip()
+    INFO(f"ID detectao {id}")
+    return id
+
+def get_CE_pin(id) -> int:
+
+    if   id == "tan0" or id == "tan1":
+        pin = 22
+    elif id == "tbn0" or id == "tbn1":
+        pin = 25
+
+    return pin
+
 class Role(Enum):
     TRANSMITTER = "TRANSMITTER"
     RECEIVER    = "RECEIVER"
@@ -89,7 +103,7 @@ def disable_auto_ack(nrf: NRF24):
 
     nrf.set_retransmission(0, 0)  # <<< disable auto-retransmissions (x+1) * 250 µs
 
-def create_radio_object() -> NRF24:
+def create_radio_object(CE_PIN) -> NRF24:
     # pigpio
     hostname = "localhost"
     port     = 8888
@@ -166,9 +180,7 @@ def find_valid_txt_file_in_usb(usb_mount_path: Path) -> Path | None:
 
 
 # :::: CHANNELS :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-def get_channels_based_on_node_id(all_channels: list[int]) -> tuple[list[int], list[int]]:
-    id = Path("~/node_id").expanduser().resolve().read_text().strip()
-    INFO(f"ID detectao {id}")
+def get_channels_based_on_node_id(all_channels: list[int], id) -> tuple[list[int], list[int]]:
 
     if   id == "tan0":
         offset = 0
@@ -353,12 +365,15 @@ def main():
     )
     args = parser.parse_args()
 
-    nrf            = create_radio_object() 
+    id = get_id()
+    CE_PIN = get_CE_pin(id)
+
+    nrf            = create_radio_object(CE_PIN) 
     usb_mount_path = get_usb_mount_path()
     file_path      = find_valid_txt_file_in_usb(usb_mount_path)
 
     all_channels   = [channel for channel in range(0, 115 + 1, 5)]
-    own_channels, other_channels = get_channels_based_on_node_id(all_channels)
+    own_channels, other_channels = get_channels_based_on_node_id(all_channels,id)
 
     INFO(f"OWN CHANNELS: {own_channels}")
     INFO(f"OTHER CHANNELS: {other_channels}")
