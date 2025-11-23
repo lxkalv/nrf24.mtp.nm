@@ -242,7 +242,7 @@ def choose_occupied_channel(nrf: NRF24, other_channels: list[int]) -> int:
 
 
 # :::: FLOW FUNCTIONS :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-def ACT_AS_TX(nrf: NRF24, content: bytes, own_channels: list[int]) -> None:
+def ACT_AS_TX(nrf: NRF24, content: bytes, own_channels: list[int], first_node) -> None:
     INFO("SOY UN TRANSMISOR PUTA")
     channel = choose_free_channel(nrf, own_channels)
     nrf.set_channel(channel)
@@ -271,6 +271,14 @@ def ACT_AS_TX(nrf: NRF24, content: bytes, own_channels: list[int]) -> None:
         message = cycle[idx % cycle_len]
         nrf.send(message)
         idx += 1
+
+        if not first_node:
+            usb_mount_path = get_usb_mount_path()
+            if usb_mount_path:
+                INFO("SE HA ENCONTRADO UN USB PA GUARDAR LAS COSAS ERMANIKO") 
+                (usb_mount_path / "file_received").write_bytes(content)
+                first_node = True #No es que sea el primer nodo, pero como ya ha guardado el archivo lo pongo en TRUE porque ya ha cumplido su funcion
+                SUCC("ARCHIVO GUARDADO EN EL USB")
 
     return
 
@@ -357,11 +365,13 @@ def main():
 
     content        = None
 
-    if args.first:
+    first_node = args.first
+
+    if first_node:
         INFO("ESTE NODO HA SIDO ESCOGIDO COMO EL PRIMERO Y UNICO DE SU ESPECIE")
         while not file_path:
             if not usb_mount_path:
-                INFO("ESPERANDO A QUE SE INTRODUZCA UN USB")
+                INFO("ESPERANDO A QUE SE INTRODUZCA UN USB...")
             else:
                 INFO("NO SE ENCUENTRA NINGUN ARCHIVO EN EL USB")
             
@@ -383,13 +393,21 @@ def main():
             INFO("HAY UN USB CON UN ARCHIVO DENTRO")
             INFO(f"SE HA ENCONTRADO EL SIGUIENTE ARCHIVO:{file_path}")
             content = file_path.read_bytes()
-            ACT_AS_TX(nrf, content, own_channels)
+            first_node = True #Esta linea habilita el uso de las dos logicas
+            ACT_AS_TX(nrf, content, own_channels, first_node)
         else:
             INFO("NO HAY UN USB CON UN ARCHIVO DENTRO")
             content = ACT_AS_RX(nrf, other_channels)
-            # (usb_mount_path / "file_received").write_bytes(content)
-            Path("file_received").write_bytes(content)
-            ACT_AS_TX(nrf, content, own_channels)
+            usb_mount_path = get_usb_mount_path()
+            if usb_mount_path:
+                INFO("SE HA ENCONTRADO UN USB PA GUARDAR LAS COSAS ERMANIKO") 
+                (usb_mount_path / "file_received").write_bytes(content)
+                first_node = True #No es que sea el primer nodo, pero como ya ha guardado el archivo lo pongo en TRUE porque ya ha cumplido su funcion
+                SUCC("ARCHIVO GUARDADO EN EL USB")
+            else:
+                INFO("NO SA ENCONTRAO EL USB PA GUARDAR, LO GUARDO POR AHI")
+                Path("file_received").write_bytes(content)
+            ACT_AS_TX(nrf, content, own_channels, first_node)
 
     nrf.power_down()
     return
