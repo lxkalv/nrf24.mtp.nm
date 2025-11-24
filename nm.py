@@ -33,7 +33,8 @@ os.system("clear")
 
 
 # :::: CONSTANTS/GLOBALS ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-#CE_PIN               = 22
+CE_PIN_A             = 22
+CE_PIN_B             = 25
 RECEIVER_TIMEOUT_S   = 20
 BYTES_IN_FRAME       = 31
 channel_read_timeout = 1
@@ -66,9 +67,9 @@ def get_id() -> str:
 def get_CE_pin(id) -> int:
 
     if   id == "tan0" or id == "tan1":
-        pin = 22
+        pin = CE_PIN_A
     elif id == "tbn0" or id == "tbn1":
-        pin = 25
+        pin = CE_PIN_B
 
     return pin
 
