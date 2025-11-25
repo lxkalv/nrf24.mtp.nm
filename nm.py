@@ -230,7 +230,7 @@ def choose_free_channel(nrf: NRF24, own_channels: list[int]) -> int:
     INFO(F"LA OKUPABILIDAD DE ESE CANAL ES {n}")
     return selected
             
-def choose_occupied_channel(nrf: NRF24, other_channels: list[int], channel_idx) -> int,int:
+def choose_occupied_channel(nrf: NRF24, other_channels: list[int], channel_idx) -> tuple[int, int]:
     nrf.power_up_rx()
 
     #channel_idx = 0
