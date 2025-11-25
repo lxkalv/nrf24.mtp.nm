@@ -353,6 +353,7 @@ def ACT_AS_RX(nrf: NRF24, other_channels: list[int]) -> bytes:
                 
                 tries += 1
                 if tries >= PERSEVERANCE:
+                    INFO("VOY A PROBAR A CAMBIAR DE CANAL PORK ESTE VA TO MAL")
                     channel, channel_idx = choose_occupied_channel(nrf, other_channels, channel_idx+1)
                     nrf.set_channel(channel)
 
