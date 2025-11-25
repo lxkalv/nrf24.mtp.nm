@@ -38,6 +38,7 @@ CE_PIN_B             = 25
 RECEIVER_TIMEOUT_S   = 20
 BYTES_IN_FRAME       = 31
 channel_read_timeout = 1
+PERSEVERANCE         = 5
 # :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
@@ -229,10 +230,10 @@ def choose_free_channel(nrf: NRF24, own_channels: list[int]) -> int:
     INFO(F"LA OKUPABILIDAD DE ESE CANAL ES {n}")
     return selected
             
-def choose_occupied_channel(nrf: NRF24, other_channels: list[int]) -> int:
+def choose_occupied_channel(nrf: NRF24, other_channels: list[int], channel_idx) -> int,int:
     nrf.power_up_rx()
 
-    channel_idx = 0
+    #channel_idx = 0
     INFO("CALLARSE QUE ESTOY ESCUCHANDO CANALES")
     while True:
         channel = other_channels[channel_idx % len(other_channels)]
@@ -248,7 +249,7 @@ def choose_occupied_channel(nrf: NRF24, other_channels: list[int]) -> int:
             if not nrf.data_ready(): continue
             
             INFO(f"POS ESCUCHO EN EL CANAL {channel}")
-            return channel
+            return channel, channel_idx
 
         channel_idx += 1
 # :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -297,7 +298,7 @@ def ACT_AS_TX(nrf: NRF24, content: bytes, own_channels: list[int], first_node) -
 
 def ACT_AS_RX(nrf: NRF24, other_channels: list[int]) -> bytes:
     INFO("SOY UN RECEPTOR")
-    channel = choose_occupied_channel(nrf, other_channels)
+    channel, channel_idx = choose_occupied_channel(nrf, other_channels, 0)
     nrf.set_channel(channel)
 
     checksum           = None
@@ -306,6 +307,8 @@ def ACT_AS_RX(nrf: NRF24, other_channels: list[int]) -> bytes:
     slots              = []
 
     file_received = False
+
+    tries = 0
     while not file_received:
         
         if not nrf.data_ready():
@@ -347,6 +350,12 @@ def ACT_AS_RX(nrf: NRF24, other_channels: list[int]) -> bytes:
 
             else:
                 WARN("EL CHESUM TA MAL LOKO")
+                
+                tries += 1
+                if tries >= PERSEVERANCE:
+                    channel, channel_idx = choose_occupied_channel(nrf, other_channels, channel_idx+1)
+                    nrf.set_channel(channel)
+
 # :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
