@@ -33,12 +33,13 @@ os.system("clear")
 
 
 # :::: CONSTANTS/GLOBALS ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-CE_PIN_A             = 22
-CE_PIN_B             = 25
-RECEIVER_TIMEOUT_S   = 20
-BYTES_IN_FRAME       = 31
-channel_read_timeout = 1
-PERSEVERANCE         = 5
+CE_PIN_A                    = 22
+CE_PIN_B                    = 25
+RECEIVER_TIMEOUT_S          = 20
+BYTES_IN_FRAME              = 31
+channel_read_timeout        = 1
+PERSEVERANCE                = 5
+channel_permanence_timeout  = 1
 # :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
@@ -309,9 +310,17 @@ def ACT_AS_RX(nrf: NRF24, other_channels: list[int]) -> bytes:
     file_received = False
 
     tries = 0
+
+    tic = time.time()
+    
     while not file_received:
         
         if not nrf.data_ready():
+            tac = time.time()
+            if (tac- tic) > channel_permanence_timeout:
+                INFO("VOY A PROBAR A CAMBIAR DE CANAL PORK ESTE VA TO MAL")
+                channel, channel_idx = choose_occupied_channel(nrf, other_channels, channel_idx+1)
+                nrf.set_channel(channel)
             continue
 
         frame: bytes = nrf.get_payload()
@@ -356,7 +365,8 @@ def ACT_AS_RX(nrf: NRF24, other_channels: list[int]) -> bytes:
                     INFO("VOY A PROBAR A CAMBIAR DE CANAL PORK ESTE VA TO MAL")
                     channel, channel_idx = choose_occupied_channel(nrf, other_channels, channel_idx+1)
                     nrf.set_channel(channel)
-
+                    
+        tic = time.time()
 # :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
