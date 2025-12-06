@@ -9,21 +9,15 @@ from nrf24 import (
     RF24_CRC,
 )
 
+from hashlib import shake_256
 from pathlib import Path
+from math import ceil
+import argparse
 import pigpio
-
 import time
-import sys
 import os
 
-from math import ceil
-
-from hashlib import shake_256
-
-from enum import Enum
 from typing import NoReturn
-
-import argparse
 
 os.system("sudo pigpiod")
 os.system("clear")
@@ -36,8 +30,9 @@ os.system("clear")
 # :::: CONSTANTS/GLOBALS ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 CE_PIN_A                    = 22
 CE_PIN_B                    = 25
-RECEIVER_TIMEOUT_S          = 20
+
 BYTES_IN_FRAME              = 31
+
 CHANNEL_READ_TIMEOUT        = 200e-3
 PERSEVERANCE                = 50
 CHANNEL_PERMANENCE_TIMEOUT  = 3
@@ -84,12 +79,13 @@ def get_CE_pin(node_id: str) -> int:
 
 
 
-def disable_auto_ack(nrf: NRF24):
+def disable_auto_ack(nrf: NRF24) -> None:
     nrf.unset_ce()
     nrf._nrf_write_reg(nrf.EN_AA, 0x00)   # <<< disable auto-ack for all pipes
     nrf.set_ce()
 
     nrf.set_retransmission(0, 0)  # <<< disable auto-retransmissions (x+1) * 250 µs
+    return
 
 
 
@@ -437,7 +433,7 @@ def ACT_AS_RX(nrf: NRF24, other_channels: list[int]) -> bytes:
 
 
 # :::: MAIN :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-def main(nrf: NRF24, node_id: str, is_first_node: bool):
+def main(nrf: NRF24, node_id: str, is_first_node: bool) -> None:
     """
     Main flow of the application
     """
