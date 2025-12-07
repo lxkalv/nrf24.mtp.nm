@@ -390,7 +390,7 @@ def ACT_AS_RX(nrf: NRF24, other_channels: list[int]) -> bytes:
         if FrameID == 0xFF:
             data_len = int.from_bytes(frame[1:3])
             checksum = frame[3:]
-            INFO(f"Parsed header message: File length: {int.from_bytes(data_len)} B | Checksum: {checksum.hex()}")
+            INFO(f"Parsed header message: File length: {data_len} B | Checksum: {checksum.hex()}")
             
             num_of_frames = ceil(data_len / BYTES_IN_FRAME)
 
