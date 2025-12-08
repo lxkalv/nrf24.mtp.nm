@@ -368,7 +368,6 @@ def ACT_AS_RX(nrf: NRF24, other_channels: list[int]) -> bytes:
 
     checksum           = None
     is_reading_frames  = False
-    slot_not_generated = True
     slots              = []
     tries              = 0
 
@@ -402,16 +401,14 @@ def ACT_AS_RX(nrf: NRF24, other_channels: list[int]) -> bytes:
                 prev_checksum = checksum
                 
                 num_of_frames = ceil(data_len / BYTES_IN_FRAME)
-
-                if slot_not_generated:
-                    INFO(f"Parsed header message: File length: {data_len} B | Checksum: {checksum.hex()}")
-                    slots = [
-                        bytes()
-                        for _ in range(num_of_frames)
-                    ]
-                    slot_not_generated = False
+                
+                slots = [
+                    bytes()
+                    for _ in range(num_of_frames)
+                ]
 
                 is_reading_frames = True
+                INFO(f"Parsed header message: File length: {data_len} B | Checksum: {checksum.hex()}")
 
 
         if is_reading_frames and (FrameID < 0xFF):
